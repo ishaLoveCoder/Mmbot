@@ -1,4 +1,4 @@
-pyrofork==2.3.42
+pyrogram==2.0.106
 TgCrypto==1.2.5
 motor==3.3.2
 fastapi==0.115.0
