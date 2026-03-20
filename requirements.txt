@@ -1,0 +1,11 @@
+pyrofork==2.3.42
+TgCrypto==1.2.5
+motor==3.3.2
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+aiohttp==3.10.5
+beautifulsoup4==4.12.3
+lxml==5.3.0
+python-dotenv==1.0.1
+dnspython==2.6.1
+pymongo==4.7.3
