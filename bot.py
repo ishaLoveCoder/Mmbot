@@ -5,8 +5,8 @@ import threading
 import logging
 from datetime import datetime
 
-from pyrofork import Client, filters
-from pyrofork.types import (
+from pyrogram import Client, filters
+from pyrogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Message,
