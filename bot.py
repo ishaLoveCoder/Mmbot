@@ -12,7 +12,8 @@ from pyrogram.types import (
     Message,
 )
 
-from app import run as run_web
+import uvicorn
+from app import app as web_app
 from database import db
 from imdb import search_movie, get_movie
 from database import save_media, get_media_by_msgid, get_all_media, get_stats
@@ -168,8 +169,11 @@ async def start(client: Client, message: Message):
             f"📦 Quality: {record.get('quality', '')} | 💾 {record.get('file_size', '')}\n\n"
             f"📖 {str(record.get('plot', ''))[:300]}..."
         )
+        imdb_url = record.get("imdb_url", "").strip()
+        if not imdb_url or not imdb_url.startswith("http"):
+            imdb_url = f"https://www.imdb.com/find?q={record.get('title','')}"
         btn = InlineKeyboardMarkup([[
-            InlineKeyboardButton("🌐 IMDb", url=record.get("imdb_url", "https://imdb.com"))
+            InlineKeyboardButton("🌐 IMDb", url=imdb_url)
         ]])
 
         poster = record.get("poster_url", "")
@@ -288,10 +292,20 @@ async def startup():
     await db.create_indexes()
     log.info("✅ DB indexes ready")
 
+async def main():
+    await startup()
+    log.info("🌐 Starting web server as async task...")
+    port = int(os.getenv("PORT", 8080))
+    config = uvicorn.Config(web_app, host="0.0.0.0", port=port, log_level="warning", loop="none")
+    server = uvicorn.Server(config)
+    # Run uvicorn in background task — same event loop as pyrogram
+    asyncio.get_event_loop().create_task(server.serve())
+    log.info("🤖 Starting CineVault Bot...")
+    await bot.start()
+    from pyrogram import idle
+    await idle()
+    await bot.stop()
+
 if __name__ == "__main__":
     import asyncio
-    asyncio.get_event_loop().run_until_complete(startup())
-    log.info("🌐 Starting web server thread...")
-    threading.Thread(target=run_web, daemon=True).start()
-    log.info("🤖 Starting CineVault Bot...")
-    bot.run()
+    asyncio.get_event_loop().run_until_complete(main())
