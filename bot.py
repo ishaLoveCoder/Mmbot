@@ -13,6 +13,7 @@ from pyrogram.types import (
 )
 
 from app import run as run_web
+from database import db
 from imdb import search_movie, get_movie
 from database import save_media, get_media_by_msgid, get_all_media, get_stats
 
@@ -282,7 +283,14 @@ async def stats_cmd(client: Client, message: Message):
 
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
+async def startup():
+    """Run startup tasks before bot starts."""
+    await db.create_indexes()
+    log.info("✅ DB indexes ready")
+
 if __name__ == "__main__":
+    import asyncio
+    asyncio.get_event_loop().run_until_complete(startup())
     log.info("🌐 Starting web server thread...")
     threading.Thread(target=run_web, daemon=True).start()
     log.info("🤖 Starting CineVault Bot...")
